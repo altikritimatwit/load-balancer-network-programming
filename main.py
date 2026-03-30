@@ -18,7 +18,8 @@ def main():
 
         backend = bp.pick_backend()
 
-        handler_thread = threading.Thread(target=proxy.handle_connections, args=(cs, backend))
+        host, port = backend.split(":")
+        handler_thread = threading.Thread(target=proxy.handle_connections, args=(cs, (host, int(port))))
         handler_thread.start()
 
 if __name__ == "__main__":
