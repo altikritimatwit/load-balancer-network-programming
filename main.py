@@ -3,11 +3,14 @@ import proxy
 import config
 import socket
 import threading
+from health import HealthChecker 
 
 def main():
 
     cfg = config.load_config()
     bp = backends.BackendPool(cfg["backends"])
+    hc = HealthChecker(bp)
+    hc.start()
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     s.bind(("", cfg["listen_port"]))
