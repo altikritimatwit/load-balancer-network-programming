@@ -2,23 +2,24 @@ import socket
 import threading
 import sys
 
+# Dummy backend server that would be replaced by real server 
+# This server just echoes back the bytes sent to it
 def handle(conn):
-    with conn:
-        while True:
-            chunk = conn.recv(4096)
-            if not chunk:
-                break
-            conn.sendall(chunk)
+    while True:
+        data = conn.recv(1024)
+        if not data:
+            break
+        conn.sendall(data)
 
-def run(port):
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        s.bind(('', port))
-        s.listen()
-        print(f"Backend listening on port {port}")
-        while True:
-            conn, addr = s.accept()
-            threading.Thread(target=handle, args=(conn,), daemon=True).start()
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.bind(("", int(sys.argv[1])))
+s.listen()
 
-port = int(sys.argv[1])
-run(port)
+
+print(f"Backend listening on port {sys.argv[1]}")
+
+while True:
+    cs, addr = s.accept()
+
+    handler_thread = threading.Thread(target=handle, args=(cs,))
+    handler_thread.start()
