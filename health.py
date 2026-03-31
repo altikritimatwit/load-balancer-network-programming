@@ -19,11 +19,11 @@ class HealthChecker:
 
     def run(self):
         while self.running:
-            healthy = []
-
-            for backend in self.backend_pool.backends:
-                if self.check_backend(backend):
-                    healthy.append(backend)
+            with self.backend_pool.lock:
+                # making a copy of the backends so that our client threads can still access the origninal lock
+                all_backends = list(self.backend_pool.backends)
+        
+            healthy = [b for b in all_backends if self.check_backend(b)]
 
             with self.backend_pool.lock:
                 self.backend_pool.healthy_backends = healthy
